@@ -15,5 +15,4 @@ public class Fertilizer {
 
     public int getDay_length(){return this.day_length;}
 
-
 }

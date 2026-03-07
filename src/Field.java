@@ -1,19 +1,35 @@
- public class Field {
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+public class Field {
     private tile[][] Tiles;
     private String[][] DisplayTiles;
     private Fertilizer[] theFertilizer;
 
-    public Field(){
+
+    public Field() throws Exception{
         Tiles=new tile[2][2];
         DisplayTiles=new String[2][2];
         theFertilizer=new Fertilizer[3];
+
+        BufferedReader reader = new BufferedReader(new FileReader("Fertilizers.json"));
+        StringBuilder sb = new StringBuilder();
+        String line = reader.readLine();
+        reader.close();
+        line=line.replaceAll("[{}]", "");
+        line=line.replaceAll("\"", "");
+        line=line.replaceAll(" ", "_");
+        line=line.replaceAll(",", ":");
+        String Holder[]=line.split(":");
+
         for(int x=0; x<2; x++){
             for(int y=0; y<2; y++) {Tiles[x][y] = new tile();}
         }
 
         for(int x=0; x<3; x++){
-            //theFertilizer[x]= new Fertilizer();
+            theFertilizer[x]= new Fertilizer(Holder[2+(7*x)], Integer.parseInt(Holder[4+(7*x)]), Integer.parseInt(Holder[6+(7*x)]));
         }
+        //Note, index 0 is quick, 1 is lasting, 2 is quality for the Fertilizer index.
     }
 
     public void setAllTiles(){
@@ -22,8 +38,12 @@
         DisplayTiles[1][0]="g";
     }
 
-    public String getTile(int x, int y){
+    public String getDisplayTile(int x, int y){
         return this.DisplayTiles[x][y];
+    }
+
+    public tile getGameTile(int x, int y){
+        return this.Tiles[x][y];
     }
 
     public boolean WaterTile(int x, int y){
@@ -73,19 +93,22 @@
         this.Tiles[x][y].setFertileTime(67);
     }
 
-    public void checkSoilType(int x, int y){
+    public void checkSoilType(int x, int y, int i){
         if(this.Tiles[x][y].isSoilOptimal())
         {this.DisplayTiles[x][y]=this.DisplayTiles[x][y].toUpperCase();}
     }
 
-    public void updateGrowth(int x, int y){
-        int i=this.Tiles[x][y].getIsGrown();
-        if (i==-1){this.DisplayTiles[x][y]=this.DisplayTiles[x][y]+"!";}
+    public void updateGrowth(int x, int y, int i){
+        int z=this.Tiles[x][y].getIsGrown();
+        if (z==-1){this.DisplayTiles[x][y]=this.DisplayTiles[x][y]+"!";}
 
-        else {this.DisplayTiles[x][y]=this.DisplayTiles[x][y].replaceAll("[0-9]",Integer.toString(i));}
+        else {
+            this.DisplayTiles[x][y]=this.DisplayTiles[x][y].replaceAll("0","");
+            this.DisplayTiles[x][y]=this.DisplayTiles[x][y].replaceAll("[1-9]",Integer.toString(i));
+        }
     }
 
-    public void updatePlant(int x, int y){
+    public void updatePlant(int x, int y, int i){
         this.DisplayTiles[x][y]=this.DisplayTiles[x][y].replaceAll("[a-zA-z]",this.Tiles[x][y].getPlantDisplay());
     }
 
@@ -98,7 +121,17 @@
         }
     }
 
-    public void applyFertilizer(int x, int y){
+    public void applyFertilizer(int x, int y, int days){
+        if(!this.Tiles[x][y].isFertilized()) {
+            this.Tiles[x][y].setFertilized(true);
+            this.Tiles[x][y].setFertileTime(days);
+        }
+    }
+
+    public void harvestCrop(int x, int y){
+    if (this.Tiles[x][y].getIsGrown()==-1){
 
     }
+    }
+
 }
