@@ -3,6 +3,7 @@ public class Plant {
     private String name;
     private int price;
     private int yield;
+    private int current_growth;
     private int max_growth;
     private String preferred_soil;
     private int crop_price;
@@ -39,4 +40,11 @@ public class Plant {
     public int getCropPrice() {
         return crop_price;
     }
+
+    public int getCurrent_growth(){return current_growth;}
+
+    public void setCurrent_growth(int current_growth){
+        this.current_growth=current_growth;
+    }
+
 }
