@@ -10,7 +10,7 @@ public class Driver {
         DisplayMap.setAllTiles();
         String Holder[];
         //scanner.nextInt()
-        BufferedReader reader = new BufferedReader(new FileReader("Plants.json"));
+        BufferedReader reader = new BufferedReader(new FileReader("HighScores.json"));
         StringBuilder sb = new StringBuilder();
         String line = reader.readLine();
         reader.close();
@@ -18,9 +18,12 @@ public class Driver {
         line=line.replaceAll("\"", "");
         line=line.replaceAll(" ", "_");
         line=line.replaceAll(",", ":");
-        System.out.println(line);
         Holder=line.split(":");
+        System.out.println(line);
 
+        Leaderboard nuh=new Leaderboard();
+        nuh.register_score("Dih", 10);
+        nuh.display_score();
     }
 
 }
