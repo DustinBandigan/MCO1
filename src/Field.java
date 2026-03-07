@@ -8,11 +8,11 @@ public class Field {
 
 
     public Field() throws Exception{
-        Tiles=new tile[2][2];
-        DisplayTiles=new String[2][2];
+        Tiles=new tile[10][10];
+        DisplayTiles=new String[10][10];
         theFertilizer=new Fertilizer[3];
 
-        BufferedReader reader = new BufferedReader(new FileReader("Fertilizers.json"));
+        BufferedReader reader = new BufferedReader(new FileReader("Map.json"));
         StringBuilder sb = new StringBuilder();
         String line = reader.readLine();
         reader.close();
@@ -20,10 +20,31 @@ public class Field {
         line=line.replaceAll("\"", "");
         line=line.replaceAll(" ", "_");
         line=line.replaceAll(",", ":");
-        String Holder[]=line.split(":");
+        line=line.replaceAll(",", ":");
+        line=line.replaceAll("[\\[\\]]", ":");
+        line=line.replaceAll(":::", ":");
+        line=line.replaceAll("::", ":");
+        line=line.substring(34);
+        String Holder2[]=line.split(":");
 
-        for(int x=0; x<2; x++){
-            for(int y=0; y<2; y++) {Tiles[x][y] = new tile();}
+
+        BufferedReader reader2 = new BufferedReader(new FileReader("Fertilizers.json"));
+        StringBuilder sb2 = new StringBuilder();
+        String line2 = reader2.readLine();
+        reader2.close();
+        line2=line2.replaceAll("[{}]", "");
+        line2=line2.replaceAll("\"", "");
+        line2=line2.replaceAll(" ", "_");
+        line2=line2.replaceAll(",", ":");
+        String Holder[]=line2.split(":");
+
+        int index=0;
+        for(int x=0; x<10; x++){
+            for(int y=0; y<10; y++) {
+                Tiles[x][y] = new tile();
+                DisplayTiles[x][y]=Holder2[index];
+                index++;
+            }
         }
 
         for(int x=0; x<3; x++){
@@ -32,10 +53,17 @@ public class Field {
         //Note, index 0 is quick, 1 is lasting, 2 is quality for the Fertilizer index.
     }
 
-    public void setAllTiles(){
-        DisplayTiles[0][0]="l";
-        DisplayTiles[0][1]="s";
-        DisplayTiles[1][0]="g";
+    public void DisplayMap() {
+        for (int x = 0; x < 10; x++) {
+            System.out.println();
+            System.out.printf("========================================================================");
+            System.out.println();
+            System.out.printf("           ");
+            for (int y = 0; y < 10; y++){
+
+                System.out.printf("|| %s ",DisplayTiles[x][y]);
+            }
+        }
     }
 
     public String getDisplayTile(int x, int y){

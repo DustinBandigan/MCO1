@@ -7,10 +7,10 @@ public class Driver {
         Scanner scanner = new Scanner(System.in);
         int input;
         Field DisplayMap = new Field();
-        DisplayMap.setAllTiles();
+        DisplayMap.DisplayMap();
         String Holder[];
         //scanner.nextInt()
-        BufferedReader reader = new BufferedReader(new FileReader("HighScores.json"));
+        BufferedReader reader = new BufferedReader(new FileReader("Map.json"));
         StringBuilder sb = new StringBuilder();
         String line = reader.readLine();
         reader.close();
@@ -18,12 +18,12 @@ public class Driver {
         line=line.replaceAll("\"", "");
         line=line.replaceAll(" ", "_");
         line=line.replaceAll(",", ":");
+        line=line.replaceAll(",", ":");
+        line=line.replaceAll("[\\[\\]]", ":");
+        line=line.replaceAll(":::", ":");
+        line=line.replaceAll("::", ":");
+        line=line.substring(34);
         Holder=line.split(":");
-        System.out.println(line);
-
-        Leaderboard nuh=new Leaderboard();
-        nuh.register_score("Dih", 10);
-        nuh.display_score();
     }
 
 }
