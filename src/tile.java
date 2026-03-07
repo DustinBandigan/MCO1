@@ -65,6 +65,11 @@ public class tile {
         this.Usable=Usable;
     }
 
+    public void setSoilType(String SoilType){
+        this.SoilType=SoilType;
+    }
+
+
     public void setFertileTime(int FertileTime){
         this.FertileTime=FertileTime;
     }

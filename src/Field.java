@@ -158,7 +158,6 @@ public class Field {
 
     public void harvestCrop(int x, int y){
     if (this.Tiles[x][y].getIsGrown()==-1){
-
     }
     }
 
