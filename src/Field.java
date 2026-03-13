@@ -2,13 +2,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class Field {
-    private tile[][] Tiles;
+    private Tile[][] Tiles;
     private String[][] DisplayTiles;
     private Fertilizer[] theFertilizer;
 
 
     public Field() throws Exception{
-        Tiles=new tile[10][10];
+        Tiles=new Tile[10][10];
         DisplayTiles=new String[10][10];
         theFertilizer=new Fertilizer[3];
 
@@ -41,7 +41,7 @@ public class Field {
         int index=0;
         for(int x=0; x<10; x++){
             for(int y=0; y<10; y++) {
-                Tiles[x][y] = new tile();
+                Tiles[x][y] = new Tile();
                 DisplayTiles[x][y]=Holder2[index];
                 index++;
             }
@@ -70,7 +70,7 @@ public class Field {
         return this.DisplayTiles[x][y];
     }
 
-    public tile getGameTile(int x, int y){
+    public Tile getGameTile(int x, int y){
         return this.Tiles[x][y];
     }
 
@@ -157,8 +157,8 @@ public class Field {
     }
 
     public void harvestCrop(int x, int y){
-    if (this.Tiles[x][y].getIsGrown()==-1){
-    }
+        if (this.Tiles[x][y].getIsGrown()==-1){
+        }
     }
 
 }
