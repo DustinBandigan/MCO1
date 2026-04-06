@@ -53,19 +53,6 @@ public class Field {
         //Note, index 0 is quick, 1 is lasting, 2 is quality for the Fertilizer index.
     }
 
-    public void DisplayMap() {
-        for (int x = 0; x < 10; x++) {
-            System.out.println();
-            System.out.printf("========================================================================");
-            System.out.println();
-            System.out.printf("           ");
-            for (int y = 0; y < 10; y++){
-
-                System.out.printf("|| %s ",DisplayTiles[x][y]);
-            }
-        }
-    }
-
     public String getDisplayTile(int x, int y){
         return this.DisplayTiles[x][y];
     }
@@ -121,7 +108,7 @@ public class Field {
         this.Tiles[x][y].setFertileTime(67);
     }
 
-    public void checkSoilType(int x, int y, int i){
+    public void checkSoilType(int x, int y){
         if(this.Tiles[x][y].isSoilOptimal())
         {this.DisplayTiles[x][y]=this.DisplayTiles[x][y].toUpperCase();}
     }
@@ -136,7 +123,7 @@ public class Field {
         }
     }
 
-    public void updatePlant(int x, int y, int i){
+    public void updatePlant(int x, int y){
         this.DisplayTiles[x][y]=this.DisplayTiles[x][y].replaceAll("[a-zA-z]",this.Tiles[x][y].getPlantDisplay());
     }
 
@@ -156,9 +143,25 @@ public class Field {
         }
     }
 
-    public void harvestCrop(int x, int y){
-        if (this.Tiles[x][y].getIsGrown()==-1){
+    //This function will return the amount of crop yielded
+    public int harvestCrop(int x, int y){
+        String holder = this.Tiles[x][y].getCurrent_crop().getState();
+
+        //If a plant is harvested when it's in a Seedling, Dormant, or Energized State it doesn't yield anything.
+        if(holder.equals("Special") || holder.equals("Seedling")){
+            return 0;
         }
+
+        //If a plant is harvested in its lose, it yields normal.
+        else if(holder.equals("Low")){
+            return this.Tiles[x][y].getCurrent_crop().getYield();
+        }
+
+        //The last two states, Mature and High yield the same amount of crop, which is *2
+        else {
+            return this.Tiles[x][y].getCurrent_crop().getYield()*2;
+        }
+
     }
 
 }

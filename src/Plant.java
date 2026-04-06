@@ -5,6 +5,7 @@ public class Plant {
     private int yield;
     private int current_growth;
     private int max_growth;
+    private String State;
     private String preferred_soil;
     private int crop_price;
     private int key;
@@ -35,6 +36,10 @@ public class Plant {
         return max_growth;
     }
 
+    public String getState(){
+        return State;
+    }
+
     public String getPreferredSoil() {
         return preferred_soil;
     }
@@ -51,6 +56,10 @@ public class Plant {
 
     public void setCurrent_growth(int current_growth){
         this.current_growth=current_growth;
+    }
+
+    public void setState(String State){
+        this.State=State;
     }
 
     public void resetCrop(){
