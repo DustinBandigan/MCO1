@@ -3,14 +3,14 @@ public class Special_Plant extends Plant{
     private Boolean Dormant;
     private Boolean Root_Crop;
 
-    Special_Plant(String name, int price, int yield, int max_growth, String preferred_soil, int crop_price, int key, Boolean Energizing, Boolean Dormant){
-        super(name, price, yield, max_growth, preferred_soil, crop_price, key);
+    Special_Plant(String name, int price1, int price2, int yield, int max_growth, String preferred_soil, int crop_price, Boolean Energizing, Boolean Dormant){
+        super(name, price1, price2, yield, max_growth, preferred_soil, crop_price);
         this.Energizing=Energizing;
         this.Dormant=Dormant;
     }
 
-    Special_Plant(String name, int price, int yield, int max_growth, String preferred_soil, int crop_price, int key, Boolean Energizing, Boolean Dormant, Boolean Root_crop){
-        this(name, price, yield, max_growth, preferred_soil, crop_price, key, Energizing, Dormant);
+    Special_Plant(String name, int price1, int price2, int yield, int max_growth, String preferred_soil, int crop_price, Boolean Energizing, Boolean Dormant, Boolean Root_crop){
+        this(name, price1, price2, yield,max_growth, preferred_soil, crop_price, Energizing, Dormant);
         this.Root_Crop = true;
     }
 

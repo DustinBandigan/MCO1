@@ -13,7 +13,24 @@ public class Tile {
         this.FertileTime=0;
         this.Usable =true;
         this.Watered=false;
-        this.thePlant = new Plant[5];
+        //Initializes the plant choices.
+
+        this.thePlant = new Plant[]{
+            //This is the Turnip.
+            new Special_Plant("Turnip",5,6,2,9,"l",6,false, false),
+            //This is Wheat.
+            new Special_Plant("Wheat", 4, 4, 4, 20, "l", 5, false, false),
+            //This is Thyme.
+            new Plant("Thyme", 0, 7, 6,12,"g",7),
+            //This is Potato.
+            new Special_Plant("Potato", 4,8,3,23,"s",3,false,false),
+            //This is Tomato.
+            new Special_Plant("Tomato",0, 8,9,23,"s",3,false,false)
+        };
+
+
+
+
     }
 
     public boolean isUsable(){

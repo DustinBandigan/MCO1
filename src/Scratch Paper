@@ -3,7 +3,8 @@ Plant Stats:
 turnip
 Sub-Class Dormant Plant
 name: Turnip
-price: 10
+Low_price: 5
+High_price: 6
 yield: 2
 max_growth: 9
 preferred_soil: loam
@@ -13,7 +14,8 @@ crop_price: 6
 wheat
 Sub-Class Energizing Plant
 name: Wheat
-price: 15
+Low_price: 4
+High_price: 4
 yield: 4
 max_growth: 20
 preferred_soil: loam
@@ -22,7 +24,8 @@ crop_price: 5
 Thyme
 No Sub-Class, Normal ass Plant,
 name: Thyme
-price: 25
+Low_price: 0
+High_price: 7
 yield: 6
 max_growth: 12
 preferred_soil: gravel
@@ -31,7 +34,8 @@ crop_price: 7
 potato
 Sub-Class, Special Plant Dormant and Energizing
 name: Potato
-price: 20
+Low_price: 4
+High_price: 8
 yield: 3
 max_growth: 29
 preferred_soil: sand
@@ -40,7 +44,8 @@ crop_price: 8
 tomato
 Sub-Class, Special Plant Dormant and Energizing
 name: Tomato
-price: 10
+Low_price: 0
+High_price: 8
 yield: 9
 max_growth: 23
 preferred_soil: sand

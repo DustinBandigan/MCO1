@@ -114,7 +114,7 @@ public class Field {
     }
 
     public void updateGrowth(int x, int y, int i){
-        int z=this.Tiles[x][y].getIsGrown();
+        int z=this.Tiles[x][y].getCurrent_crop().getCurrent_growth();
         if (z==-1){this.DisplayTiles[x][y]=this.DisplayTiles[x][y]+"!";}
 
         else {
@@ -144,8 +144,9 @@ public class Field {
     }
 
     //This function will return the amount of crop yielded
-    public int harvestCrop(int x, int y){
+    public int yieldCrop(int x, int y){
         String holder = this.Tiles[x][y].getCurrent_crop().getState();
+        Special_Plant plant_holder = (Special_Plant) this.Tiles[x][y].getCurrent_crop();
 
         //If a plant is harvested when it's in a Seedling, Dormant, or Energized State it doesn't yield anything.
         if(holder.equals("Special") || holder.equals("Seedling")){
@@ -161,6 +162,32 @@ public class Field {
         else {
             return this.Tiles[x][y].getCurrent_crop().getYield()*2;
         }
+
+    }
+
+    //This gets the final price of the crop if you're going to sell / harvest it, you can use this to make sure it returns 0.
+    public int sellCrop(int x, int y){
+        int yield=yieldCrop(x,y);
+        String holder = this.Tiles[x][y].getCurrent_crop().getState();
+        Special_Plant plant_holder = (Special_Plant) this.Tiles[x][y].getCurrent_crop();
+
+        //It's either special root crop case + high productive, or root crop + Mature, non_root + Mature/High, or just Low / 0 if no yield.
+
+        if(this.Tiles[x][y].getCurrent_crop() instanceof Special_Plant){
+            //If a Root Crop is in high productive it yields 2x as much AND has 50% bonus, hence the calculation
+            if(plant_holder.IsRoot_Crop() && holder.equals("High")){
+                    return (int) Math.round(plant_holder.getHigh_price()*1.5) * yield;
+            }
+        }
+
+        if(holder.equals("Mature") || holder.equals("High")){
+            //Sells for high productive price, yield already calculated
+            return yield*this.Tiles[x][y].getCurrent_crop().getHigh_price();
+        }
+
+        //Sells for either 0 or low productive price.
+        return yield*this.Tiles[x][y].getCurrent_crop().getLow_price();
+
 
     }
 
