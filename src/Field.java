@@ -12,7 +12,7 @@ public class Field {
         DisplayTiles=new String[10][10];
         theFertilizer=new Fertilizer[3];
 
-        BufferedReader reader = new BufferedReader(new FileReader("Map.json"));
+        BufferedReader reader = new BufferedReader(new FileReader("MCO1-main/Map.json"));
         StringBuilder sb = new StringBuilder();
         String line = reader.readLine();
         reader.close();
@@ -28,7 +28,7 @@ public class Field {
         String Holder2[]=line.split(":");
 
 
-        BufferedReader reader2 = new BufferedReader(new FileReader("Fertilizers.json"));
+        BufferedReader reader2 = new BufferedReader(new FileReader("MCO1-main/Fertilizers.json"));
         StringBuilder sb2 = new StringBuilder();
         String line2 = reader2.readLine();
         reader2.close();
@@ -175,7 +175,7 @@ public class Field {
 
         if(this.Tiles[x][y].getCurrent_crop() instanceof Special_Plant){
             //If a Root Crop is in high productive it yields 2x as much AND has 50% bonus, hence the calculation
-            if(plant_holder.IsRoot_Crop() && holder.equals("High")){
+            if(Boolean.TRUE.equals(plant_holder.IsRoot_Crop()) && holder.equals("High")){
                     return (int) Math.round(plant_holder.getHigh_price()*1.5) * yield;
             }
         }
