@@ -5,32 +5,26 @@ public class Game {
     private static final int SIZE = 10;
     private static final int PLANT_COUNT = 5;
     private static final int FERTILIZER_COUNT = 3;
+    private static final int SEASON_DAYS = 20;
+    private static final int METEOR_DAY = 15;
 
     private Player player;
     private Field field;
-    private int currentDay;
     private Leaderboard highScores;
 
+    private int currentDay;
     private boolean meteorTriggered;
+    private boolean gameOver;
     private int excavationsToday;
 
     private String[] plantNames = new String[PLANT_COUNT];
     private int[] plantPrices = new int[PLANT_COUNT];
-    private int[] plantYield = new int[PLANT_COUNT];
-    private int[] plantMaxGrowth = new int[PLANT_COUNT];
-    private String[] plantPreferredSoil = new String[PLANT_COUNT];
-    private int[] cropPrice = new int[PLANT_COUNT];
 
     private String[] fertilizerNames = new String[FERTILIZER_COUNT];
     private int[] fertilizerPrices = new int[FERTILIZER_COUNT];
     private int[] fertilizerDays = new int[FERTILIZER_COUNT];
 
     private String[][] baseSoil = new String[SIZE][SIZE];
-    private int[][] plantedType = new int[SIZE][SIZE];
-    private int[][] growthStage = new int[SIZE][SIZE];
-    private boolean[][] watered = new boolean[SIZE][SIZE];
-    private int[][] fertilizerType = new int[SIZE][SIZE];
-    private int[][] fertilizerRemaining = new int[SIZE][SIZE];
     private boolean[][] meteorHit = new boolean[SIZE][SIZE];
     private boolean[][] permanentFertilizer = new boolean[SIZE][SIZE];
 
@@ -38,9 +32,10 @@ public class Game {
         this.player = player;
         this.field = field;
         this.highScores = highScores;
-        currentDay = 1;
-        meteorTriggered = false;
-        excavationsToday = 0;
+        this.currentDay = 1;
+        this.meteorTriggered = false;
+        this.gameOver = false;
+        this.excavationsToday = 0;
 
         loadPlants();
         loadFertilizers();
@@ -51,14 +46,21 @@ public class Game {
     private void initializeTiles() {
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                plantedType[r][c] = -1;
-                fertilizerType[r][c] = -1;
+                meteorHit[r][c] = false;
+                permanentFertilizer[r][c] = false;
+
+                Tile tile = field.getGameTile(r, c);
+                tile.setSoilType(baseSoil[r][c]);
+                tile.setUsable(true);
+                tile.setWatered(false);
+                tile.setFertilized(false);
+                tile.setFertileTime(0);
             }
         }
     }
 
     private String[] cleanAndSplit(String fileName) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        BufferedReader reader = new BufferedReader(new FileReader("MCO1-main/Plants.json"));
         String line = reader.readLine();
         reader.close();
 
@@ -66,31 +68,39 @@ public class Game {
         return line.split(":");
     }
 
-    private void loadPlants() throws Exception {
-        String[] h = cleanAndSplit("Plants.json");
-        for (int i = 0; i < PLANT_COUNT; i++) {
-            int x = 13 * i;
-            plantNames[i] = h[2 + x];
-            plantPrices[i] = Integer.parseInt(h[4 + x]);
-            plantYield[i] = Integer.parseInt(h[6 + x]);
-            plantMaxGrowth[i] = Integer.parseInt(h[8 + x]);
-            plantPreferredSoil[i] = h[10 + x];
-            cropPrice[i] = Integer.parseInt(h[12 + x]);
-        }
+    private void loadPlants() {
+        plantNames[0] = "Turnip";
+        plantPrices[0] = 10;
+
+        plantNames[1] = "Wheat";
+        plantPrices[1] = 15;
+
+        plantNames[2] = "Thyme";
+        plantPrices[2] = 25;
+
+        plantNames[3] = "Potato";
+        plantPrices[3] = 20;
+
+        plantNames[4] = "Tomato";
+        plantPrices[4] = 10;
     }
 
-    private void loadFertilizers() throws Exception {
-        String[] h = cleanAndSplit("Fertilizers.json");
-        for (int i = 0; i < FERTILIZER_COUNT; i++) {
-            int x = 7 * i;
-            fertilizerNames[i] = h[2 + x];
-            fertilizerPrices[i] = Integer.parseInt(h[4 + x]);
-            fertilizerDays[i] = Integer.parseInt(h[6 + x]);
-        }
+    private void loadFertilizers() {
+        fertilizerNames[0] = "Quick Fertilizer";
+        fertilizerPrices[0] = 100;
+        fertilizerDays[0] = 2;
+
+        fertilizerNames[1] = "Lasting Fertilizer";
+        fertilizerPrices[1] = 150;
+        fertilizerDays[1] = 3;
+
+        fertilizerNames[2] = "Premium Fertilizer";
+        fertilizerPrices[2] = 200;
+        fertilizerDays[2] = 6;
     }
 
     private void loadMap() throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader("Map.json"));
+        BufferedReader reader = new BufferedReader(new FileReader("MCO1-main/Map.json"));
         String line = reader.readLine();
         reader.close();
 
@@ -115,63 +125,105 @@ public class Game {
         return currentDay;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public boolean hasMeteorOccurred() {
+        return meteorTriggered;
+    }
+
+    public void printHeader() {
+        System.out.println("\n====================================");
+        System.out.println("DAY " + currentDay + " / " + SEASON_DAYS);
+        System.out.println("Player: " + player.getName());
+        System.out.println("Savings: " + player.getMoney());
+        System.out.println("Water: " + player.getWateringCan().getCurrentLevel() + "/" +
+                player.getWateringCan().getMaxLevel());
+        System.out.println("====================================");
+    }
+
+    public void showLegend() {
+        System.out.println("\nLegend:");
+        System.out.println("l = loam, s = sand, g = gravel");
+        System.out.println("xx = crop initials");
+        System.out.println("[ ] = watered");
+        System.out.println("( ) = fertilized");
+        System.out.println("* = meteor tile");
+        System.out.println("! = harvestable");
+    }
+
     public void showMenu() {
+        System.out.println("\nActions:");
         System.out.println("1. Plant Seed");
         System.out.println("2. Remove or Harvest");
         System.out.println("3. Water");
         System.out.println("4. Refill Watering Can (100)");
         System.out.println("5. Apply Fertilizer");
-        System.out.println("6. Next Day");
+
+        if (meteorTriggered) {
+            System.out.println("6. Excavate Meteorite");
+            System.out.println("7. Next Day");
+        } else {
+            System.out.println("6. Next Day");
+        }
     }
 
     public void showPlantMenu() {
-        System.out.println("Choose plant:");
-        for (int i = 0; i < plantNames.length; i++) {
+        System.out.println("\nChoose plant:");
+        for (int i = 0; i < PLANT_COUNT; i++) {
             System.out.println((i + 1) + ". " + plantNames[i] + " - " + plantPrices[i]);
         }
     }
 
     public void showFertilizerMenu() {
-        System.out.println("Choose fertilizer:");
-        for (int i = 0; i < fertilizerNames.length; i++) {
-            System.out.println((i + 1) + ". " + fertilizerNames[i] + " - " + fertilizerPrices[i]);
+        System.out.println("\nChoose fertilizer:");
+        for (int i = 0; i < FERTILIZER_COUNT; i++) {
+            System.out.println((i + 1) + ". " + fertilizerNames[i] + " - " + fertilizerPrices[i]
+                    + " (" + fertilizerDays[i] + " days)");
         }
     }
 
     public void displayField() {
         System.out.print("    ");
         for (int c = 0; c < SIZE; c++) {
-            System.out.printf("%-6d", c + 1);
+            System.out.printf("%-10d", c + 1);
         }
         System.out.println();
 
         for (int r = 0; r < SIZE; r++) {
             System.out.printf("%-4d", r + 1);
             for (int c = 0; c < SIZE; c++) {
-                System.out.printf("%-6s", getTileDisplay(r, c));
+                System.out.printf("%-10s", getTileDisplay(r, c));
             }
             System.out.println();
         }
     }
 
     private String getTileDisplay(int row, int col) {
+        Tile tile = field.getGameTile(row, col);
         String symbol;
 
         if (meteorHit[row][col]) {
             symbol = "*";
-        } else if (plantedType[row][col] != -1) {
-            symbol = plantNames[plantedType[row][col]].substring(0, 2).toLowerCase();
-            if (growthStage[row][col] >= plantMaxGrowth[plantedType[row][col]]) {
+        } else if (hasPlant(row, col)) {
+            Plant crop = tile.getCurrent_crop();
+            symbol = crop.getName().substring(0, 2).toLowerCase();
+
+            refreshCropState(crop, tile);
+
+            if (isHarvestable(crop)) {
                 symbol += "!";
             }
         } else {
             symbol = baseSoil[row][col];
         }
 
-        if (fertilizerType[row][col] != -1 || permanentFertilizer[row][col]) {
+        if (tile.isFertilized() || permanentFertilizer[row][col]) {
             symbol = "(" + symbol + ")";
         }
-        if (watered[row][col]) {
+
+        if (tile.isWatered()) {
             symbol = "[" + symbol + "]";
         }
 
@@ -182,18 +234,23 @@ public class Game {
         return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
     }
 
-    private String soilName(int row, int col) {
-        if (baseSoil[row][col].equals("l")) return "loam";
-        if (baseSoil[row][col].equals("s")) return "sand";
-        return "gravel";
+    private boolean hasPlant(int row, int col) {
+        Tile tile = field.getGameTile(row, col);
+        return tile.getCurrent_crop() != null &&
+                tile.getCurrent_crop().getName() != null &&
+                !tile.getCurrent_crop().getName().equals("");
     }
 
-    private void clearPlant(int row, int col) {
-        plantedType[row][col] = -1;
-        growthStage[row][col] = 0;
-        watered[row][col] = false;
-        field.getGameTile(row, col).setWatered(false);
-        field.getGameTile(row, col).removeCrop(0);
+    private void refreshCropState(Plant crop, Tile tile) {
+        if (crop instanceof Special_Plant) {
+            ((Special_Plant) crop).Special_UpdateStage();
+        }
+        tile.updateStage();
+    }
+
+    private boolean isHarvestable(Plant crop) {
+        String state = crop.getState();
+        return state.equals("Low") || state.equals("High") || state.equals("Mature");
     }
 
     public void plantSeed(int row, int col, int plantChoice) {
@@ -201,28 +258,33 @@ public class Game {
             System.out.println("Invalid tile.");
             return;
         }
-        if (plantChoice < 0 || plantChoice >= plantNames.length) {
+
+        if (plantChoice < 0 || plantChoice >= PLANT_COUNT) {
             System.out.println("Invalid plant choice.");
             return;
         }
-        if (meteorHit[row][col]) {
+
+        Tile tile = field.getGameTile(row, col);
+
+        if (meteorHit[row][col] || !tile.isUsable()) {
             System.out.println("Cannot plant on a meteor tile.");
             return;
         }
-        if (plantedType[row][col] != -1) {
+
+        if (hasPlant(row, col)) {
             System.out.println("There is already a plant there.");
             return;
         }
+
         if (!player.deductSavings(plantPrices[plantChoice])) {
             System.out.println("Not enough savings.");
             return;
         }
 
-        plantedType[row][col] = plantChoice;
-        growthStage[row][col] = 0;
-        watered[row][col] = false;
-        field.getGameTile(row, col).plantCrop(plantChoice);
-        field.getGameTile(row, col).setWatered(false);
+        tile.plantCrop(plantChoice);
+        tile.getCurrent_crop().setCurrent_growth(0);
+        tile.getCurrent_crop().setState("Seedling");
+        tile.setWatered(false);
 
         System.out.println(plantNames[plantChoice] + " planted.");
     }
@@ -232,18 +294,23 @@ public class Game {
             System.out.println("Invalid tile.");
             return;
         }
-        if (plantedType[row][col] == -1) {
+
+        if (!hasPlant(row, col)) {
             System.out.println("No plant on that tile.");
             return;
         }
 
-        int type = plantedType[row][col];
-        if (growthStage[row][col] >= plantMaxGrowth[type]) {
-            int earnings = plantYield[type] * cropPrice[type];
+        Tile tile = field.getGameTile(row, col);
+        Plant crop = tile.getCurrent_crop();
+
+        refreshCropState(crop, tile);
+
+        if (isHarvestable(crop)) {
+            int earnings = field.sellCrop(row, col);
             player.addSavings(earnings);
-            System.out.println("Harvested " + plantNames[type] + " for " + earnings + ".");
+            System.out.println("Harvested " + crop.getName() + " for " + earnings + ".");
         } else {
-            System.out.println(plantNames[type] + " removed.");
+            System.out.println(crop.getName() + " removed.");
         }
 
         clearPlant(row, col);
@@ -254,29 +321,34 @@ public class Game {
             System.out.println("Invalid tile.");
             return;
         }
-        if (plantedType[row][col] == -1) {
+
+        if (!hasPlant(row, col)) {
             System.out.println("No plant on that tile.");
             return;
         }
-        if (watered[row][col]) {
-            System.out.println("Plant already watered.");
+
+        Tile tile = field.getGameTile(row, col);
+
+        if (tile.isWatered()) {
+            System.out.println("Tile already watered.");
             return;
         }
+
         if (!player.getWateringCan().water()) {
             System.out.println("Watering can is empty.");
             return;
         }
 
-        watered[row][col] = true;
-        field.getGameTile(row, col).setWatered(true);
+        tile.setWatered(true);
         System.out.println("Tile watered.");
     }
 
     public void refillWateringCan() {
         if (!player.deductSavings(100)) {
-            System.out.println("Not enough savings to refill watering can.");
+            System.out.println("Not enough savings.");
             return;
         }
+
         player.getWateringCan().refill();
         System.out.println("Watering can refilled.");
     }
@@ -286,25 +358,31 @@ public class Game {
             System.out.println("Invalid tile.");
             return;
         }
-        if (fertilizerChoice < 0 || fertilizerChoice >= fertilizerNames.length) {
+
+        if (fertilizerChoice < 0 || fertilizerChoice >= FERTILIZER_COUNT) {
             System.out.println("Invalid fertilizer choice.");
             return;
         }
+
+        Tile tile = field.getGameTile(row, col);
+
         if (meteorHit[row][col]) {
             System.out.println("Cannot fertilize a meteor tile.");
             return;
         }
-        if (fertilizerType[row][col] != -1 || permanentFertilizer[row][col]) {
+
+        if (tile.isFertilized() || permanentFertilizer[row][col]) {
             System.out.println("Tile already has fertilizer.");
             return;
         }
+
         if (!player.deductSavings(fertilizerPrices[fertilizerChoice])) {
             System.out.println("Not enough savings.");
             return;
         }
 
-        fertilizerType[row][col] = fertilizerChoice;
-        fertilizerRemaining[row][col] = fertilizerDays[fertilizerChoice];
+        tile.setFertilized(true);
+        tile.setFertileTime(fertilizerDays[fertilizerChoice]);
         System.out.println("Fertilizer applied.");
     }
 
@@ -313,75 +391,178 @@ public class Game {
             System.out.println("Invalid tile.");
             return;
         }
+
+        if (!meteorTriggered) {
+            System.out.println("Meteor excavation is not available yet.");
+            return;
+        }
+
         if (!meteorHit[row][col]) {
             System.out.println("No meteor on this tile.");
             return;
         }
+
         if (excavationsToday >= 5) {
             System.out.println("Only 5 excavations are allowed per day.");
             return;
         }
+
         if (!player.deductSavings(500)) {
-            System.out.println("Not enough savings to excavate.");
+            System.out.println("Not enough savings.");
             return;
         }
 
+        Tile tile = field.getGameTile(row, col);
         meteorHit[row][col] = false;
+        tile.setUsable(true);
+        tile.setSoilType(baseSoil[row][col]);
+        tile.setFertilized(true);
+        tile.setFertileTime(999999);
         permanentFertilizer[row][col] = true;
         excavationsToday++;
+
         System.out.println("Meteor excavated.");
     }
 
     public void nextDay() {
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                if (plantedType[r][c] != -1 && watered[r][c]) {
-                    int add = 1;
-
-                    if (plantPreferredSoil[plantedType[r][c]].equals(soilName(r, c))) {
-                        add++;
-                    }
-                    if (fertilizerType[r][c] != -1 || permanentFertilizer[r][c]) {
-                        add++;
-                    }
-
-                    growthStage[r][c] += add;
-                    if (growthStage[r][c] > plantMaxGrowth[plantedType[r][c]]) {
-                        growthStage[r][c] = plantMaxGrowth[plantedType[r][c]];
-                    }
-
-                    watered[r][c] = false;
-                    field.getGameTile(r, c).setWatered(false);
-
-                    if (fertilizerType[r][c] != -1 && --fertilizerRemaining[r][c] <= 0) {
-                        fertilizerType[r][c] = -1;
-                        fertilizerRemaining[r][c] = 0;
-                    }
-                }
+                processNextDay(r, c);
             }
         }
 
         player.addSavings(50);
         excavationsToday = 0;
 
-        if (currentDay == 7 && !meteorTriggered) {
+        if (currentDay == METEOR_DAY && !meteorTriggered) {
             meteorEvent();
             meteorTriggered = true;
         }
 
-        if (currentDay == 15) {
+        if (currentDay >= SEASON_DAYS) {
             System.out.println("\nPlanting season is over!");
             endGame();
-            System.exit(0);
+            gameOver = true;
+            return;
         }
 
         currentDay++;
     }
 
+    private void processNextDay(int row, int col) {
+        Tile tile = field.getGameTile(row, col);
+
+        if (!hasPlant(row, col)) {
+            tile.setWatered(false);
+            return;
+        }
+
+        Plant crop = tile.getCurrent_crop();
+        refreshCropState(crop, tile);
+
+        int growthGain = computeGrowthGain(tile, crop);
+        crop.setCurrent_growth(crop.getCurrent_growth() + growthGain);
+
+        refreshCropState(crop, tile);
+        updateFertilizerDuration(tile, crop, row, col);
+
+        tile.setWatered(false);
+
+        if (!permanentFertilizer[row][col] && tile.getFertileTime() <= 0) {
+            tile.setFertilized(false);
+            tile.setFertileTime(0);
+        }
+    }
+
+    private int computeGrowthGain(Tile tile, Plant crop) {
+        String state = crop.getState();
+        boolean preferredSoil = tile.isSoilOptimal();
+        boolean fertilized = tile.isFertilized() || hasPermanentFertilizer(tile);
+
+        if (state.equals("Mature")) {
+            return 0;
+        }
+
+        if (state.equals("Seedling")) {
+            if (!tile.isWatered()) {
+                return 0;
+            }
+
+            int gain = 1;
+            if (preferredSoil) gain += 2;
+            if (fertilized) gain += 2;
+            return gain;
+        }
+
+        if (state.equals("Low") || state.equals("High")) {
+            if (!tile.isWatered()) {
+                return 0;
+            }
+
+            int gain = 1;
+            if (preferredSoil) gain += 1;
+            if (fertilized) gain += 1;
+            return gain;
+        }
+
+        if (crop instanceof Special_Plant) {
+            Special_Plant sp = (Special_Plant) crop;
+
+            if (sp.IsDormant() != null && sp.IsDormant()) {
+                return 1;
+            }
+
+            if (sp.IsEnergizing() != null && sp.IsEnergizing()) {
+                if (tile.isWatered()) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    private void updateFertilizerDuration(Tile tile, Plant crop, int row, int col) {
+        if (!tile.isFertilized() || permanentFertilizer[row][col]) {
+            return;
+        }
+
+        int deduction = 1;
+
+        if (crop instanceof Special_Plant) {
+            Special_Plant sp = (Special_Plant) crop;
+            if (sp.IsEnergizing() != null && sp.IsEnergizing()) {
+                deduction = 2;
+            }
+        }
+
+        tile.setFertileTime(tile.getFertileTime() - deduction);
+    }
+
+    private boolean hasPermanentFertilizer(Tile tile) {
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                if (field.getGameTile(r, c) == tile) {
+                    return permanentFertilizer[r][c];
+                }
+            }
+        }
+        return false;
+    }
+
+    private void clearPlant(int row, int col) {
+        Tile tile = field.getGameTile(row, col);
+        if (hasPlant(row, col)) {
+            tile.removeCrop(0);
+        }
+        tile.setWatered(false);
+    }
+
     private void meteorEvent() {
         System.out.println("\nA meteor has struck the field!");
 
-        int[][] meteorTiles = {
+        int[][] affectedTiles = {
                 {1,1},{1,4},{1,5},{1,8},
                 {3,3},{3,4},{3,5},{3,6},
                 {4,1},{4,3},{4,4},{4,5},{4,6},{4,8},
@@ -390,24 +571,30 @@ public class Game {
                 {8,1},{8,4},{8,5},{8,8}
         };
 
-        for (int i = 0; i < meteorTiles.length; i++) {
-            int r = meteorTiles[i][0];
-            int c = meteorTiles[i][1];
+        for (int i = 0; i < affectedTiles.length; i++) {
+            int r = affectedTiles[i][0];
+            int c = affectedTiles[i][1];
+            Tile tile = field.getGameTile(r, c);
 
-            if (plantedType[r][c] != -1) {
-                int type = plantedType[r][c];
-                if (growthStage[r][c] >= plantMaxGrowth[type]) {
-                    player.addSavings(plantYield[type] * cropPrice[type]);
+            if (hasPlant(r, c)) {
+                refreshCropState(tile.getCurrent_crop(), tile);
+
+                if (isHarvestable(tile.getCurrent_crop())) {
+                    int earnings = field.sellCrop(r, c);
+                    player.addSavings(earnings);
                 }
+
                 clearPlant(r, c);
             }
 
             meteorHit[r][c] = true;
-            fertilizerType[r][c] = -1;
-            fertilizerRemaining[r][c] = 0;
+            tile.setUsable(false);
+            tile.setWatered(false);
+            tile.setFertilized(false);
+            tile.setFertileTime(0);
         }
 
-        System.out.println("Meteor tiles are marked with *");
+        System.out.println("Meteor tiles are now blocked.");
     }
 
     public void endGame() {
