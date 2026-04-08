@@ -92,8 +92,7 @@ public class Tile {
     }
 
     public void removeCrop(int i){
-
-        this.current_crop.resetCrop();
+        this.current_crop = null; //Without this, removing a plant can permanently ruin that tile’s plant object for future planting.
     }
 
     //Call this method after a day to check for the stage of the plant and how to update it.
