@@ -4,8 +4,13 @@ public class Driver {
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("=== VERDANT SUN FARMING SIMULATOR ===");
         System.out.print("Enter player name: ");
-        String name = scanner.nextLine();
+        String name = scanner.nextLine().trim();
+
+        if (name.isEmpty()) {
+            name = "Player";
+        }
 
         Field field = new Field();
         Leaderboard leaderboard = new Leaderboard();
@@ -14,49 +19,38 @@ public class Driver {
 
         Game game = new Game(player, field, leaderboard);
 
-        while (true) {
-            System.out.println("\n=== DAY " + game.getDay() + " ===");
-            System.out.println("Player: " + player.getName());
-            System.out.println("Savings: " + player.getMoney());
-            System.out.println("Water: " + player.getWateringCan().getCurrentLevel() + "/" + player.getWateringCan().getMaxLevel());
-            System.out.println();
-
+        while (!game.isGameOver()) {
+            game.printHeader();
             game.displayField();
-
-            System.out.println("\nLegend: l=loam s=sand g=gravel *=meteor [ ]=watered ( )=fertilized !=mature");
+            game.showLegend();
             game.showMenu();
-            System.out.print("Enter choice: ");
-            int choice = scanner.nextInt();
 
-            int row;
-            int col;
+            System.out.print("\nEnter choice: ");
+            if (!scanner.hasNextInt()) {
+                System.out.println("Invalid input.");
+                scanner.nextLine();
+                continue;
+            }
+
+            int choice = scanner.nextInt();
 
             switch (choice) {
                 case 1:
-                    System.out.print("Row: ");
-                    row = scanner.nextInt() - 1;
-                    System.out.print("Column: ");
-                    col = scanner.nextInt() - 1;
                     game.showPlantMenu();
-                    System.out.print("Plant choice: ");
-                    int plantChoice = scanner.nextInt();
-                    game.plantSeed(row, col, plantChoice - 1);
+                    int plantChoice = askChoice(scanner, "Plant choice: ") - 1;
+
+                    int row = askRow(scanner);
+                    int col = askCol(scanner);
+
+                    game.plantSeed(row, col, plantChoice);
                     break;
 
                 case 2:
-                    System.out.print("Row: ");
-                    row = scanner.nextInt() - 1;
-                    System.out.print("Column: ");
-                    col = scanner.nextInt() - 1;
-                    game.removeOrHarvest(row, col);
+                    game.removeOrHarvest(askRow(scanner), askCol(scanner));
                     break;
 
                 case 3:
-                    System.out.print("Row: ");
-                    row = scanner.nextInt() - 1;
-                    System.out.print("Column: ");
-                    col = scanner.nextInt() - 1;
-                    game.water(row, col);
+                    game.water(askRow(scanner), askCol(scanner));
                     break;
 
                 case 4:
@@ -64,23 +58,66 @@ public class Driver {
                     break;
 
                 case 5:
-                    System.out.print("Row: ");
-                    row = scanner.nextInt() - 1;
-                    System.out.print("Column: ");
-                    col = scanner.nextInt() - 1;
                     game.showFertilizerMenu();
-                    System.out.print("Fertilizer choice: ");
-                    int fertilizerChoice = scanner.nextInt();
-                    game.applyFertilizer(row, col, fertilizerChoice - 1);
+                    int fertilizerChoice = askChoice(scanner, "Fertilizer choice: ") - 1;
+
+                    row = askRow(scanner);
+                    col = askCol(scanner);
+
+                    game.applyFertilizer(row, col, fertilizerChoice);
                     break;
 
                 case 6:
-                    game.nextDay();
+                    if (game.hasMeteorOccurred()) {
+                        game.excavate(askRow(scanner), askCol(scanner));
+                    } else {
+                        game.nextDay();
+                    }
+                    break;
+
+                case 7:
+                    if (game.hasMeteorOccurred()) {
+                        game.nextDay();
+                    } else {
+                        System.out.println("Invalid choice.");
+                    }
                     break;
 
                 default:
                     System.out.println("Invalid choice.");
             }
         }
+
+        scanner.close();
+    }
+
+    private static int askRow(Scanner scanner) {
+        System.out.print("Row (1-10): ");
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid row.");
+            scanner.nextLine();
+            System.out.print("Row (1-10): ");
+        }
+        return scanner.nextInt() - 1;
+    }
+
+    private static int askCol(Scanner scanner) {
+        System.out.print("Column (1-10): ");
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid column.");
+            scanner.nextLine();
+            System.out.print("Column (1-10): ");
+        }
+        return scanner.nextInt() - 1;
+    }
+
+    private static int askChoice(Scanner scanner, String prompt) {
+        System.out.print(prompt);
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid choice.");
+            scanner.nextLine();
+            System.out.print(prompt);
+        }
+        return scanner.nextInt();
     }
 }
