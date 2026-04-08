@@ -1,0 +1,62 @@
+views.Plant Stats:
+
+turnip
+Sub-Class Dormant views.Plant
+name: Turnip
+Low_price: 5
+High_price: 6
+yield: 2
+max_growth: 9
+preferred_soil: loam
+crop_price: 6
+
+
+wheat
+Sub-Class Energizing views.Plant
+name: Wheat
+Low_price: 4
+High_price: 4
+yield: 4
+max_growth: 20
+preferred_soil: loam
+crop_price: 5
+
+Thyme
+No Sub-Class, Normal ass views.Plant,
+name: Thyme
+Low_price: 0
+High_price: 7
+yield: 6
+max_growth: 12
+preferred_soil: gravel
+crop_price: 7
+
+potato
+Sub-Class, Special views.Plant Dormant and Energizing
+name: Potato
+Low_price: 4
+High_price: 8
+yield: 3
+max_growth: 29
+preferred_soil: sand
+crop_price: 8
+
+tomato
+Sub-Class, Special views.Plant Dormant and Energizing
+name: Tomato
+Low_price: 0
+High_price: 8
+yield: 9
+max_growth: 23
+preferred_soil: sand
+crop_price: 3
+
+
+Current Growth count starts from 0, so now we adjust max_growth by counting index 0 again
+
+Where I left off:
+Indexing of Wheat, calculating how I'm going to find that using Current growth
+
+Once Sub-Class making is finished, next step is to add the Behaviors of the First views.Plant, Thyme and stuff.
+
+Look for the Patterns in the plants for the states of Seedling-low-high and otherwise.
