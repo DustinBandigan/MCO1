@@ -5,8 +5,9 @@ public class Special_Plant extends Plant{
 
     Special_Plant(String name, int price1, int price2, int yield, int max_growth, String preferred_soil, int crop_price, Boolean Energizing, Boolean Dormant){
         super(name, price1, price2, yield, max_growth, preferred_soil, crop_price);
-        this.Energizing=Energizing;
-        this.Dormant=Dormant;
+        this.Energizing = Energizing;
+        this.Dormant = Dormant;
+        this.Root_Crop = false;   // added this
     }
 
     Special_Plant(String name, int price1, int price2, int yield, int max_growth, String preferred_soil, int crop_price, Boolean Energizing, Boolean Dormant, Boolean Root_crop){
