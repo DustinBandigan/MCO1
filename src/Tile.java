@@ -17,15 +17,15 @@ public class Tile {
 
         this.thePlant = new Plant[]{
             //This is the Turnip.
-            new Special_Plant("Turnip",5,6,2,9,"l",6,false, false),
+            new Special_Plant("Turnip",5,6,2,9,"l",10,false, false, true),
             //This is Wheat.
-            new Special_Plant("Wheat", 4, 4, 4, 20, "l", 5, false, false),
+            new Special_Plant("Wheat", 4, 4, 4, 20, "l", 15, false, false),
             //This is Thyme.
-            new Plant("Thyme", 0, 7, 6,12,"g",7),
+            new Plant("Thyme", 0, 7, 6,12,"g",20),
             //This is Potato.
-            new Special_Plant("Potato", 4,8,3,23,"s",3,false,false),
+            new Special_Plant("Potato", 4,8,3,23,"s",20,false,false,true),
             //This is Tomato.
-            new Special_Plant("Tomato",0, 8,9,23,"s",3,false,false)
+            new Special_Plant("Tomato",0, 8,9,23,"s",10,false,false)
         };
 
 
